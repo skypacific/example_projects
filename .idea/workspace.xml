@@ -84,9 +84,19 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
-      <pane id="ProjectPane" />
       <pane id="Scope" />
+      <pane id="PackagesPane" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="example-projects" type="b2602c69:ProjectViewProjectNode" />
+              <item name="example-projects" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -121,14 +131,15 @@
       <updated>1549179192492</updated>
       <workItem from="1549179193869" duration="674000" />
       <workItem from="1549180945389" duration="717000" />
+      <workItem from="1549182735584" duration="23000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1391000" />
+    <option name="totallyTimeSpent" value="1414000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1219" height="801" extended-state="1" />
+    <frame x="0" y="23" width="1219" height="801" extended-state="0" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2497876" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />

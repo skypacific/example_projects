@@ -1,4 +1,4 @@
-package com.example.sbtest03.model;
+package com.example.sbtest03.product;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

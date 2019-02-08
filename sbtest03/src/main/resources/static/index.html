@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<!--suppress HtmlUnknownAttribute, JSUnusedGlobalSymbols -->
+<html lang="en"
+      xmlns:v-on="http://www.w3.org/1999/xhtml"
+      xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Vue.js Shop</title>
+</head>
+<body>
+<div id="app">
+    <h1>{{title}}</h1>
+    <div>
+        <h2>Product</h2>
+        <ul>
+            <li v-for="product in products">
+                {{ product.title }} ($ {{ product.price}}) - 재고 {{ product.inventory }} 
+                <button v-on:click="addToBasket($event, product)" v-bind:disabled="product.inventory <= 0">Add Cart</button>
+            </li>
+        </ul>
+    </div>
+    <div>
+        <h2>Cart</h2>
+        <ul>
+            <li v-for="product in cartItems">
+                {{ product.title }} ($ {{ product.price}}) x {{ product.quantity}} 
+            </li>
+        </ul>
+        <h3>Total Amount : $ {{ totalAmount }}</h3> 
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+
+<script type="application/javascript" language="JavaScript">
+    new Vue({
+        el: '#app',
+        data: {
+            title: 'Vue.js Store',
+            products: [
+                // {id:1, title:'iPad Mini', price:500.5, inventory:7},
+                // {id:2, title:'iPad Pro', price:800.4, inventory:5},
+                // {id:3, title:'MacBook', price:1200.6, inventory:2}
+            ],
+            cartItems: [
+                // {id:1, title:'iPad Mini', price:500.5, quantity:1},
+            ]
+        },
+        methods: {
+            addToBasket : function(event, product) {
+                /*
+                var prdIdx = this.$data.products.indexOf(product);
+                if (prdIdx > -1) {
+                    if (this.$data.products[prdIdx].inventory > 0) {
+                        this.$data.products[prdIdx].inventory--;
+                        this.$data.cartItems.push(product);
+                    }
+                }
+                */
+                var fltProducs = this.$data.products.filter(function (v) { return v.id === product.id });
+                console.assert(fltProducs.length > 0);
+                console.assert(fltProducs[0].inventory > 0);
+                fltProducs[0].inventory--;
+
+                var fltBasket = this.$data.cartItems.filter(function (v) { return v.id === product.id });
+                if (fltBasket.length > 0) {
+                    fltBasket[0].quantity++;
+                } else {
+                    this.$data.cartItems.push({
+                        "id": product.id,
+                        "title": product.title,
+                        "price": product.price,
+                        "quantity": 1
+                    });
+                }
+            }
+        },
+        computed: {
+            totalAmount : function() {
+                /*
+                // 1. Use for loop 
+                var val = 0.0;
+                for (var i = 0; i < this.$data.cartItems.length; i++) {
+                    val += this.$data.cartItems[i].price;
+                }
+                return val;
+                */
+                
+                // 2. Use reduce
+                var totalAmount = this.$data.cartItems.reduce(function (previousSum, currentItem) { 
+                    return previousSum + currentItem.price * currentItem.quantity;
+                }, 0);
+                
+                return Math.round(totalAmount);
+            }
+        },
+        mounted: function () {
+            var PRODUCT_API_URL = "/product/";
+            var _app = this;
+
+            // 1. use XMLHttpRequest
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState === 4 && this.status === 200) {
+                    _app.$data.products = (typeof this.response === "string") ? JSON.parse(this.response) : this.response; 
+                }
+            };
+            xhttp.open("GET", PRODUCT_API_URL, true);
+            xhttp.send();
+
+            // 2. fetch + Promise
+            /*
+            fetch(PRODUCT_API_URL)
+                .then(function(response) {
+                    if(response.ok) {
+                        response.json().then(function(jsonData) {
+                            _app.$data.products = jsonData;
+                        });
+                    } else {
+                        console.log('Network response was not ok.');
+                    }
+                })
+                .catch(function(error) {
+                    console.log(error);
+                });
+            */
+
+            // 3. use Axios + Promise
+            /*
+            axios.get(PRODUCT_API_URL)
+                .then(function (response) {
+                    _app.$data.products = response.data;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                })
+            */
+
+            // 4. use Axios + async/await
+            /*
+            (async () => {
+                try {
+                    _app.$data.products = (await axios.get(PRODUCT_API_URL)).data;
+                } catch(error) {
+                    console.log(error);
+                }
+            })();
+            */
+        }
+    })
+</script>
+</body>
+</html>
