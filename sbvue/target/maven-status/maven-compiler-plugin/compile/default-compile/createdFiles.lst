@@ -1,0 +1,4 @@
+com/example/sbtest03/model/Product.class
+com/example/sbtest03/repository/ProductRepository.class
+com/example/sbtest03/Sbtest03Application.class
+com/example/sbtest03/controller/ProductController.class

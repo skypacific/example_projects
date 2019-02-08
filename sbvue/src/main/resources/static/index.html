@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<!--suppress HtmlUnknownAttribute, JSUnusedGlobalSymbols -->
+<html lang="en"
+      xmlns:v-on="http://www.w3.org/1999/xhtml"
+      xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Vue.js Shop</title>
+</head>
+<body>
+<div id="app">
+    <h1>{{title}}</h1>
+    <div>
+        <h2>Product</h2>
+        <ul>
+            <li v-for="product in products">
+                {{ product.title }} ($ {{ product.price}}) - Inventory {{ product.inventory }}
+                <button v-on:click="addToCart($event, product)" v-bind:disabled="product.inventory <= 0">Add Cart</button>
+            </li>
+        </ul>
+    </div>
+    <div>
+        <h2>Cart</h2>
+        <ul>
+            <li v-for="product in cartItems">
+                {{ product.title }} ($ {{ product.price}}) x {{ product.quantity}}
+            </li>
+        </ul>
+        <h3>Total Amount : $ {{ totalAmount }}</h3>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+<script type="application/javascript" language="JavaScript">
+    new Vue({
+        el: '#app',
+        data: {
+            title: 'Vue.js Store',
+            products: [
+                // {id:1, title:'iPad Mini', price:500.5, inventory:7},
+                // {id:2, title:'iPad Pro', price:800.4, inventory:5},
+                // {id:3, title:'MacBook', price:1200.6, inventory:2}
+            ],
+            cartItems: [
+            ]
+        },
+        methods: {
+            addToCart : function(event, product) {
+                // event: DOM 이벤트 객체
+                // product: 클릭 이벤트가 발생된 제품 객체
+
+                // <코드블럭 #1>      
+                // 전체 products 배열에서 product.id 값과 일치하는 제품을 찾아 재고수량(inventory)을 -1 감소시킨다.
+                this.$data.products
+                    .filter(function(p) {return p.id === product.id})
+                    .map(function(p) {return p.inventory--});
+                
+                /*
+                // "Arrow Function" 사용 (ES6 이상 지원)
+                this.$data.products
+                    .filter(p => p.id === product.id)
+                    .map(p => p.inventory--);
+                */
+
+                // <코드블럭 #2>  
+                // 전체 cartItems 배열에서 product.id 값과 일치하는 제품을 찾아
+                // 존재하지 하면 수량(quantity)을 +1 증가시킨다.
+                // 존재하지 하지 않으면 product 파라메터로 넘어온 값을 참고하여 새로운 객체를 만들고 수량(quantity)은 1로 지정한다.
+                var _cartItem = this.$data.cartItems.filter(function(p) {return p.id === product.id});
+                if (_cartItem.length > 0) {
+                    _cartItem.map(function(p) {return p.quantity++});
+                } else {
+                    this.$data.cartItems.push({
+                        "id": product.id,
+                        "title": product.title,
+                        "price": product.price,
+                        "quantity": 1
+                    });
+                }
+            }
+        },
+        computed: {
+            totalAmount : function() {
+
+                // <코드블럭 #3>
+                // 장바구니에 담긴 제품들 전체 합계를 reduce() 함수를 사용해서 구한다.
+                var totalAmount = this.$data.cartItems.reduce(function (previousSum, currentItem) {
+                    return previousSum + currentItem.price * currentItem.quantity;
+                }, 0);
+                
+                /*
+                // "Arrow Function" 사용 (ES6 이상 지원)
+                var totalAmount = this.$data.cartItems.reduce(
+                    (previousSum, currentItem) => previousSum + currentItem.price * currentItem.quantity
+                    , 0);
+                */
+                
+                return Math.round(totalAmount);
+            }
+        },
+        mounted: function () {
+            var PRODUCT_API_URL = "/product/";
+            var _app = this;
+
+            // <코드블럭 #4>
+            // REST API를 호출한다.
+            
+            // 1. use XMLHttpRequest
+            /*
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState === 4 && this.status === 200) {
+                    _app.$data.products = (typeof this.response === "string") ? JSON.parse(this.response) : this.response;
+                }
+            };
+            xhttp.open("GET", PRODUCT_API_URL, true);
+            xhttp.send();
+            */
+
+            // 2. fetch + Promise
+            /*
+            fetch(PRODUCT_API_URL)
+                .then(function(response) {
+                    if(response.ok) {
+                        response.json().then(function(jsonData) {
+                            _app.$data.products = jsonData;
+                        });
+                    } else {
+                        console.log('Network response was not ok.');
+                    }
+                })
+                .catch(function(error) {
+                    console.log(error);
+                });
+            */
+
+            // 3. use Axios + Promise
+            axios.get(PRODUCT_API_URL)
+                .then(function (response) {
+                    _app.$data.products = response.data;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                })
+
+            // 4. use Axios + async/await
+            /*
+            (async () => {
+                try {
+                    _app.$data.products = (await axios.get(PRODUCT_API_URL)).data;
+                } catch(error) {
+                    console.log(error);
+                }
+            })();
+            */
+        }
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+Index: src/main/java/com/example/sbtest03/controller/ProductController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.sbtest03.controller;\n\nimport com.example.sbtest03.model.Product;\nimport com.example.sbtest03.repository.ProductRepository;\nimport org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.web.bind.annotation.PathVariable;\nimport org.springframework.web.bind.annotation.RequestMapping;\nimport org.springframework.web.bind.annotation.RestController;\n\nimport java.util.List;\n\n@RestController\npublic class ProductController {\n    \n    @Autowired\n    private ProductRepository productRepository;\n    \n    @RequestMapping(\"/product\")\n    public List<Product> getProduts() {\n        return productRepository.findAll();\n    }\n\n    @RequestMapping(\"/product/{id}\")\n    public Product getProdutById(@PathVariable(\"id\") int id) {\n        return productRepository.findById(id).get();\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/com/example/sbtest03/controller/ProductController.java	(date 1549186123000)
++++ src/main/java/com/example/sbtest03/controller/ProductController.java	(date 1549188768000)
+@@ -8,13 +8,19 @@
+ import org.springframework.web.bind.annotation.RestController;
+ 
+ import java.util.List;
++import java.util.Optional;
++import java.util.function.Supplier;
+ 
+ @RestController
+ public class ProductController {
+     
++    private final ProductRepository productRepository;
++
+     @Autowired
+-    private ProductRepository productRepository;
+-    
++    public ProductController(ProductRepository productRepository) {
++        this.productRepository = productRepository;
++    }
++
+     @RequestMapping("/product")
+     public List<Product> getProduts() {
+         return productRepository.findAll();
+@@ -22,6 +28,31 @@
+ 
+     @RequestMapping("/product/{id}")
+     public Product getProdutById(@PathVariable("id") int id) {
++        /*
++        // 1. Non error handling
+         return productRepository.findById(id).get();
++        */
++        
++        /*
++        // 2. Use isPresent()
++        Optional<Product> product = productRepository.findById(id);
++        if (!product.isPresent()) {
++            return new Product();
++        }
++        return product.get();
++        */
++        
++        /*
++        // 3. Use Supplier
++        return productRepository.findById(id).orElseGet(new Supplier<Product>() {
++            @Override
++            public Product get() {
++                return new Product();
++            }
++        });
++        */
++
++        // 4. Use Method Reference
++        return productRepository.findById(id).orElseGet(Product::new);
+     }
+ }
+Index: src/main/java/com/example/sbtest03/Sbtest03Application.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.sbtest03;\n\nimport com.example.sbtest03.model.Product;\nimport com.example.sbtest03.repository.ProductRepository;\nimport org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.boot.ApplicationArguments;\nimport org.springframework.boot.ApplicationRunner;\nimport org.springframework.boot.SpringApplication;\nimport org.springframework.boot.autoconfigure.SpringBootApplication;\nimport org.springframework.context.annotation.Bean;\n\n@SpringBootApplication\npublic class Sbtest03Application {\n    \n    @Autowired\n    private ProductRepository productRepository;\n    \n    // TODO Lambda Expression\n    @Bean\n    public ApplicationRunner applicationRunner() {\n        return args -> {\n            productRepository.save(new Product(1, \"iPad Mini\", 500.5, 10));\n            productRepository.save(new Product(2, \"iPad Pro\", 1000.8, 5));\n            productRepository.save(new Product(3, \"MacBook Pro\", 2100.0, 2));\n        };\n    }\n\n    public static void main(String[] args) {\n        SpringApplication.run(Sbtest03Application.class, args);\n    }\n\n}\n\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/com/example/sbtest03/Sbtest03Application.java	(date 1549186123000)
++++ src/main/java/com/example/sbtest03/Sbtest03Application.java	(date 1549186248000)
+@@ -12,9 +12,13 @@
+ @SpringBootApplication
+ public class Sbtest03Application {
+     
++    private final ProductRepository productRepository;
++
+     @Autowired
+-    private ProductRepository productRepository;
+-    
++    public Sbtest03Application(ProductRepository productRepository) {
++        this.productRepository = productRepository;
++    }
++
+     // TODO Lambda Expression
+     @Bean
+     public ApplicationRunner applicationRunner() {
